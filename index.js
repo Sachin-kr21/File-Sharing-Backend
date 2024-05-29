@@ -41,15 +41,29 @@ app.post("/", async (request, response) => {
         if (!request.body || !request.body.name || !request.body.cid) {
             return response.status(400).send('Invalid request body');
         }
-  const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
-        console.log(hashedPwd);
-            const file = await File.create({
-                name : request.body.name,
-                cid : request.body.cid,
-                password : hashedPwd
-          });
-        console.log("Uploaded file:", file);
-        response.json(file);
+    if(request.body.password){
+
+        const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
+        // console.log(hashedPwd);
+        const file = await File.create({
+            name : request.body.name,
+            cid : request.body.cid,
+            password : hashedPwd
+      });
+    //   console.log("$$$$$$$$$$$$");
+      console.log("Uploaded file:", file);
+      response.json(file);
+    }
+    else{
+        const file = await File.create({
+            name : request.body.name,
+            cid : request.body.cid
+      });
+    //   console.log("@@@@@@@@@@@@@@@@@@");
+      console.log("Uploaded file:", file);
+      response.json(file);
+    }
+            
     } catch (error) {
         console.error("Error uploading file:", error);
         response.status(500).send('Internal Server Error While Uploading');
@@ -68,8 +82,8 @@ app.put("/", async (request, response) => {
         if (!file) {
             return response.status(404).send('File not found');
         }
-        console.log("////",file.password , request.body.password , bcrypt.compare(request.body.password, file.password));
-        console.log("Retrieved file:", file);
+        // console.log("////",file.password , request.body.password , bcrypt.compare(request.body.password, file.password));
+        // console.log("Retrieved file:", file);
         if(file.password){
             if(!request.body.password){
                 console.error("File is password portected");
