@@ -8,7 +8,8 @@ const File = require("./Schema/file")
 const initializeDatabase = require('./db');
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
-
+const bcrypt = require("bcrypt");
+const saltRounds = 10;
 app.use(cors());
 
 // Middleware to update global.foodData for each request
@@ -40,11 +41,12 @@ app.post("/", async (request, response) => {
         if (!request.body || !request.body.name || !request.body.cid) {
             return response.status(400).send('Invalid request body');
         }
+  const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
 
             const file = await File.create({
                 name : request.body.name,
                 cid : request.body.cid,
-                password : request.body.password
+                password : hashedPwd
           });
         console.log("Uploaded file:", file);
         response.json(file);
@@ -72,7 +74,7 @@ app.put("/", async (request, response) => {
                 console.error("File is password portected");
                 response.json('File is password portected');
             }
-            else if(file.password==request.body.password){
+            else if(bcrypt.compare(request.body.password, file.password)){
                 response.json(file);
             }
             else{
