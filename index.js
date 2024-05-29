@@ -42,7 +42,7 @@ app.post("/", async (request, response) => {
             return response.status(400).send('Invalid request body');
         }
   const hashedPwd = await bcrypt.hash(request.body.password, saltRounds);
-
+        console.log(hashedPwd);
             const file = await File.create({
                 name : request.body.name,
                 cid : request.body.cid,
@@ -68,13 +68,14 @@ app.put("/", async (request, response) => {
         if (!file) {
             return response.status(404).send('File not found');
         }
+        console.log("////",file.password , request.body.password , bcrypt.compare(request.body.password, file.password));
         console.log("Retrieved file:", file);
         if(file.password){
             if(!request.body.password){
                 console.error("File is password portected");
                 response.json('File is password portected');
             }
-            else if(bcrypt.compare(request.body.password, file.password)){
+            else if(await bcrypt.compare(request.body.password, file.password)){
                 response.json(file);
             }
             else{
